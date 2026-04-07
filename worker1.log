@@ -1,0 +1,102 @@
+
+╭─────────────────────── Hermes Agent v0.7.0 (2026.4.3) ───────────────────────╮
+│                                       Available Tools                        │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     browser: browser_back, browser_click,  │
+│    ⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣇⠸⣿⣿⠇⣸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀     ...                                    │
+│    ⠀⢀⣠⣴⣶⠿⠋⣩⡿⣿⡿⠻⣿⡇⢠⡄⢸⣿⠟⢿⣿⢿⣍⠙⠿⣶⣦⣄⡀⠀     clarify: clarify                       │
+│    ⠀⠀⠉⠉⠁⠶⠟⠋⠀⠉⠀⢀⣈⣁⡈⢁⣈⣁⡀⠀⠉⠀⠙⠻⠶⠈⠉⠉⠀⠀     code_execution: execute_code           │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⡿⠛⢁⡈⠛⢿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     cronjob: cronjob                       │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⣿⣦⣤⣈⠁⢠⣴⣿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     delegation: delegate_task              │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠻⢿⣿⣦⡉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     file: patch, read_file, search_files,  │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢷⣦⣈⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     write_file                             │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⠦⠈⠙⠿⣦⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     homeassistant: ha_call_service,        │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣤⡈⠁⢤⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     ha_get_state, ...                      │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠷⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     image_gen: image_generate              │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠑⢶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     (and 11 more toolsets...)              │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠁⢰⡆⠈⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                            │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⠈⣡⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     MCP Servers                            │
+│    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀     planner (stdio) — 14 tool(s)           │
+│                                                                              │
+│    qwen3.5-35b-a3b · Nous Research    Available Skills                       │
+│  /private/tmp/test-final/.hermes/wo…  apple: apple-notes, apple-reminders,   │
+│    Session: 20260407_202256_9bb6ad    findmy, imessage                       │
+│                                       autonomous-ai-agents: claude-code,     │
+│                                       codex, hermes-agent, opencode, ver...  │
+│                                       creative: ascii-art, ascii-video,      │
+│                                       manim-video, p5js, popu...             │
+│                                       data-science: jupyter-live-kernel      │
+│                                       devops: webhook-subscriptions          │
+│                                       diagramming: excalidraw                │
+│                                       email: himalaya                        │
+│                                       feeds: blogwatcher                     │
+│                                       gaming: minecraft-modpack-server,      │
+│                                       pokemon-player                         │
+│                                       general: dogfood                       │
+│                                       gifs: gif-search                       │
+│                                       github: codebase-inspection,           │
+│                                       github-auth, github-code-r...          │
+│                                       inference-sh: inference-sh-cli         │
+│                                       leisure: find-nearby                   │
+│                                       mcp: mcporter, native-mcp              │
+│                                       media: youtube-content                 │
+│                                       mlops: audiocraft-audio-generation,    │
+│                                       axolotl, chroma, c...                  │
+│                                       music-creation: heartmula, songsee     │
+│                                       note-taking: obsidian                  │
+│                                       productivity: daily-plan-fallback,     │
+│                                       google-workspace, linear, ...          │
+│                                       red-teaming: godmode                   │
+│                                       research: arxiv, domain-intel,         │
+│                                       duckduckgo-search, llm-wik...          │
+│                                       smart-home: openhue                    │
+│                                       social-media: xitter                   │
+│                                       software-development:                  │
+│                                       batch-migration, code-review, plan,    │
+│                                       requesting-...                         │
+│                                                                              │
+│                                       44 tools · 105 skills · 1 MCP servers  │
+│                                       · /help for commands                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+Query: You are a test worker. Your task is to read a file and print its content.
+
+## Input
+File to read: /tmp/test-final/test.txt
+
+## Instructions
+1. Read the file
+2. Print the content
+3. Exit with success
+
+Initializing agent...
+────────────────────────────────────────
+
+  ┊ 📖 read      /tmp/test-final/test.txt  0.9s
+ ─  ⚕ Hermes  ───────────────────────────────────────────────────────────────── 
+                                                                                
+   Content of /tmp/test-final/test.txt:                                         
+                                                                                
+   Hello from test worker!                                                      
+                                                                                
+   File read successfully.                                                      
+                                                                                
+ ────────────────────────────────────────────────────────────────────────────── 
+
+Resume this session with:
+  hermes --resume 20260407_202256_9bb6ad
+
+Session:        20260407_202256_9bb6ad
+Duration:       8s
+Messages:       4 (1 user, 2 tool calls)
+Running: hermes chat -q You are a test worker. Your task is to read a file and print its content.
+
+## Input
+File to read: /tmp/test-final/test.txt
+
+## Instructions
+1. Read the file
+2. Print the content
+3. Exit with success
+ --yolo
+Working directory: /private/tmp/test-final/.hermes/worktrees/unit-01
+--------------------------------------------------------------------------------
