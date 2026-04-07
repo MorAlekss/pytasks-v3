@@ -1,0 +1,85 @@
+Вы работаете в изолированном git worktree для batch миграции HTTP calls из requests в httpx async.
+
+## Общая цель
+Мигрировать все HTTP calls из requests library в httpx async по кодовой базе.
+
+## Ваш конкретный task
+Мигрировать файл: **src/api/products.py**
+- Функции: get_product(), list_products(), create_product()
+
+## Что изменить
+### src/api/products.py
+Замените synchronous requests на асинхронный httpx:
+
+Старый код:
+```python
+import requests
+
+BASE_URL = "https://api.example.com"
+
+def get_product(product_id):
+    response = requests.get(f"{BASE_URL}/products/{product_id}")
+    response.raise_for_status()
+    return response.json()
+
+def list_products(category=None):
+    params = {"category": category} if category else {}
+    response = requests.get(f"{BASE_URL}/products", params=params)
+    response.raise_for_status()
+    return response.json()
+
+def create_product(data):
+    response = requests.post(f"{BASE_URL}/products", json=data)
+    response.raise_for_status()
+    return response.json()
+```
+
+Новый код:
+```python
+import httpx
+
+BASE_URL = "https://api.example.com"
+
+async def get_product(product_id):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{BASE_URL}/products/{product_id}")
+        response.raise_for_status()
+        return response.json()
+
+async def list_products(category=None):
+    params = {"category": category} if category else {}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{BASE_URL}/products", params=params)
+        response.raise_for_status()
+        return response.json()
+
+async def create_product(data):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(f"{BASE_URL}/products", json=data)
+        response.raise_for_status()
+        return response.json()
+```
+
+## E2E тест рецепт
+```bash
+# Установите httpx
+pip install httpx
+
+# Запустите тесты
+python -m pytest tests/ -v
+```
+
+## Инструкция
+1. Установите зависимости: pip install httpx
+2. Замените код в файле src/api/products.py
+3. Простите изменения: используйте simplify skill если есть
+4. Запустите тесты: python -m pytest tests/ -v
+5. Проверьте E2E: убедитесь что тесты проходят
+6. Закоммитьте и пушьте:
+   git add -A
+   git commit -m "batch: migrate src/api/products.py to httpx async"
+   git push -u origin batch/migrate-httpx-03
+7. Создайте PR:
+   gh pr create --title "Batch: migrate src/api/products.py to httpx async" --body "Migrated synchronous requests calls to async httpx in src/api/products.py"
+8. В финале напишите точно одну строку: PR: <url>
+   Если PR не создан: PR: none - <reason>
