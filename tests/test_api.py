@@ -22,6 +22,6 @@ async def test_get_product():
         mock_response.json.return_value = {"id": 1, "name": "Widget"}
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
-        from src.api.products import aget_product
-        result = await aget_product(1)
+        from src.api.products import get_product
+        result = await get_product(1)
         assert result["name"] == "Widget"
