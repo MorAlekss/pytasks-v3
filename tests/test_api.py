@@ -1,27 +1,38 @@
 import sys
 sys.path.insert(0, '.')
-from unittest.mock import patch, MagicMock
+import pytest
+from unittest.mock import AsyncMock, MagicMock, patch
 
-def test_get_user():
-    with patch('src.api.users.requests.get') as mock_get:
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"id": 1, "name": "Alice"}
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
+@pytest.mark.asyncio
+async def test_get_user():
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"id": 1, "name": "Alice"}
+    mock_response.raise_for_status.return_value = None
+
+    with patch('httpx.AsyncClient') as MockClient:
+        mock_client = AsyncMock()
+        mock_client.get.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_client.__aexit__.return_value = None
+        MockClient.return_value = mock_client
+
         from src.api.users import get_user
-        result = get_user(1)
+        result = await get_user(1)
         assert result["id"] == 1
 
-def test_get_product():
-    with patch('src.api.products.requests.get') as mock_get:
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"id": 1, "name": "Widget"}
-        mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-        from src.api.products import get_product
-        result = get_product(1)
-        assert result["name"] == "Widget"
+@pytest.mark.asyncio
+async def test_get_product():
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"id": 1, "name": "Widget"}
+    mock_response.raise_for_status.return_value = None
 
-test_get_user()
-test_get_product()
-print("all tests passed")
+    with patch('httpx.AsyncClient') as MockClient:
+        mock_client = AsyncMock()
+        mock_client.get.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_client.__aexit__.return_value = None
+        MockClient.return_value = mock_client
+
+        from src.api.products import get_product
+        result = await get_product(1)
+        assert result["name"] == "Widget"
