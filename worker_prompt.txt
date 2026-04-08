@@ -1,0 +1,82 @@
+You are a batch migration worker. Your task is strictly scoped.
+You have NO access to the coordinator's context - everything you need is below.
+
+## Overall goal
+Migrate all HTTP calls from `requests` library to `httpx` async across the codebase.
+
+## Your specific task
+Unit 3: Update tests (`tests/test_api.py`) to work with async httpx instead of sync requests.
+
+## Files to modify
+- tests/test_api.py
+
+## What to change
+The test file currently patches `requests.get` with `unittest.mock.patch`. After migration, the source modules use `httpx.AsyncClient` instead, so the mocks must change.
+
+Current test pattern:
+```python
+from unittest.mock import patch, MagicMock
+
+def test_get_user():
+    with patch('src.api.users.requests.get') as mock_get:
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"id": 1, "name": "Alice"}
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+        from src.api.users import get_user
+        result = get_user(1)
+        assert result["id"] == 1
+```
+
+New test pattern (migrate to):
+```python
+from unittest.mock import patch, AsyncMock, MagicMock
+import asyncio
+
+def test_get_user():
+    async def run():
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"id": 1, "name": "Alice"}
+        mock_response.raise_for_status.return_value = None
+
+        mock_client_instance = MagicMock()
+        mock_client_instance.get = AsyncMock(return_value=mock_response)
+
+        with patch('src.api.users.httpx.AsyncClient') as mock_client:
+            mock_client.return_value.__aenter__.return_value = mock_client_instance
+            from src.api.users import get_user
+            result = await get_user(1)
+            assert result["id"] == 1
+
+    asyncio.run(run())
+```
+
+Apply the same pattern to `test_get_product()`:
+- Patch `src.api.products.httpx.AsyncClient` instead of `src.api.products.requests.get`
+- Use `AsyncMock` for async methods
+- Wrap in `asyncio.run()` since test functions are sync
+
+## Codebase conventions
+- Python 3.9
+- No requirements.txt exists
+- Tests run via: `python3 tests/test_api.py`
+- Tests must print "all tests passed" at the end
+
+## E2E test recipe
+```bash
+python3 tests/test_api.py
+# Expected output: "all tests passed"
+```
+
+## Instructions
+Safety rules - follow these before anything else:
+- NEVER delete source files. If migration fails, revert: git checkout -- <file>
+- Run baseline tests BEFORE any changes: python3 tests/test_api.py - note which tests pass
+
+After implementing the change:
+1. Run tests: python3 tests/test_api.py - must print "all tests passed"
+2. If tests fail, fix the mock setup until they pass
+3. Commit and push: git add -A && git commit -m "batch: migrate tests to mock httpx async" && git push origin HEAD:batch/requests-to-httpx-unit-03
+4. Create PR: gh pr create --title "Batch: migrate tests to mock httpx async" --body "Updates test_api.py to mock httpx.AsyncClient instead of requests.get, wrapping async calls in asyncio.run()."
+5. Report: end your response with exactly one line: PR: <url>
+   If no PR was created, end with: PR: none - <reason>
