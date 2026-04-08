@@ -1,0 +1,118 @@
+You are a batch migration worker. Your task is strictly scoped.
+You have NO access to the coordinator's context - everything you need is below.
+
+## Overall goal
+Migrate all HTTP calls from requests library to httpx async across the codebase.
+
+## Your specific task
+Migrate test file to mock httpx.AsyncClient instead of requests.
+
+### Files to modify
+1. /tmp/test-final/.hermes/worktrees/unit-02/tests/test_api.py
+
+## What to change
+
+The source files have been migrated to async httpx. The tests need to be updated to match.
+
+FROM:
+```python
+import sys
+sys.path.insert(0, '.')
+from unittest.mock import patch, MagicMock
+
+def test_get_user():
+    with patch('src.api.users.requests.get') as mock_get:
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"id": 1, "name": "Alice"}
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+        from src.api.users import get_user
+        result = get_user(1)
+        assert result["id"] == 1
+
+def test_get_product():
+    with patch('src.api.products.requests.get') as mock_get:
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"id": 1, "name": "Widget"}
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+        from src.api.products import get_product
+        result = get_product(1)
+        assert result["name"] == "Widget"
+
+test_get_user()
+test_get_product()
+print("all tests passed")
+```
+
+TO:
+```python
+import sys
+sys.path.insert(0, '.')
+import asyncio
+from unittest.mock import patch, MagicMock, AsyncMock
+
+async def test_get_user():
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"id": 1, "name": "Alice"}
+    mock_response.raise_for_status.return_value = None
+
+    mock_client = MagicMock()
+    mock_client.get = AsyncMock(return_value=mock_response)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    with patch('src.api.users.httpx.AsyncClient', return_value=mock_client):
+        from src.api.users import get_user
+        result = await get_user(1)
+        assert result["id"] == 1
+
+async def test_get_product():
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"id": 1, "name": "Widget"}
+    mock_response.raise_for_status.return_value = None
+
+    mock_client = MagicMock()
+    mock_client.get = AsyncMock(return_value=mock_response)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    with patch('src.api.products.httpx.AsyncClient', return_value=mock_client):
+        from src.api.products import get_product
+        result = await get_product(1)
+        assert result["name"] == "Widget"
+
+asyncio.run(test_get_user())
+asyncio.run(test_get_product())
+print("all tests passed")
+```
+
+## Codebase conventions
+- Python 3.9
+- Tests run directly as scripts (not via pytest discovery): python3 tests/test_api.py
+- Tests also work via pytest: python3 -m pytest --tb=short -q
+- No __init__.py files, sys.path.insert(0, '.') used for imports
+
+## E2E test recipe
+cd /tmp/test-final/.hermes/worktrees/unit-02 && python3 tests/test_api.py
+cd /tmp/test-final/.hermes/worktrees/unit-02 && python3 -m pytest --tb=short -q
+
+## Instructions
+Safety rules - follow these before anything else:
+- NEVER delete source files. If migration fails, revert: git checkout -- <file>
+- Run baseline tests BEFORE any changes: cd /tmp/test-final/.hermes/worktrees/unit-02 && python3 tests/test_api.py - note which tests pass
+
+IMPORTANT: The source files in this worktree still use `requests` (sync). You need to ALSO migrate the source files so the tests can pass. Migrate:
+- src/utils/http.py: `import requests` -> `import httpx`, sync -> async with `async with httpx.AsyncClient() as client:`
+- src/api/users.py: same pattern
+- src/api/products.py: same pattern
+
+Then update the test file to mock httpx.AsyncClient.
+
+After implementing the changes:
+1. Run tests: cd /tmp/test-final/.hermes/worktrees/unit-02 && python3 tests/test_api.py. If tests fail, fix them.
+2. Run pytest: cd /tmp/test-final/.hermes/worktrees/unit-02 && python3 -m pytest --tb=short -q
+3. Commit and push: cd /tmp/test-final/.hermes/worktrees/unit-02 && git add -A && git commit -m "batch: migrate tests to mock httpx.AsyncClient" && git push origin HEAD:batch/requests-to-httpx-tests-20260408
+4. Create PR: cd /tmp/test-final/.hermes/worktrees/unit-02 && gh pr create --title "Batch: Migrate tests to mock httpx.AsyncClient" --body "Updated tests/test_api.py to mock httpx.AsyncClient instead of requests. Also migrated source files in this branch so tests pass."
+5. Report - end your response with exactly one line: PR: <url>
+   If no PR was created, end with: PR: none - <reason>
