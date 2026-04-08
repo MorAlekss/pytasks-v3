@@ -1,0 +1,93 @@
+You are a batch migration worker. Your task is strictly scoped.
+You have NO access to the coordinator's context — everything you need is below.
+
+## Overall goal
+Migrate all HTTP calls from the requests library to httpx async across the codebase.
+
+## Your specific task
+Unit 3: Migrate src/api/products.py from requests (sync) to httpx (async).
+
+## Your worktree
+/tmp/test-final/.hermes/worktrees/unit-03
+cd into it before doing anything. All file editing must be done here.
+
+## Files to modify
+src/api/products.py
+
+## Current content of the file
+import requests
+
+BASE_URL = "https://api.example.com"
+
+def get_product(product_id):
+    response = requests.get(f"{BASE_URL}/products/{product_id}")
+    response.raise_for_status()
+    return response.json()
+
+def list_products(category=None):
+    params = {"category": category} if category else {}
+    response = requests.get(f"{BASE_URL}/products", params=params)
+    response.raise_for_status()
+    return response.json()
+
+def create_product(data):
+    response = requests.post(f"{BASE_URL}/products", json=data)
+    response.raise_for_status()
+    return response.json()
+
+## What to change
+- Replace `import requests` with `import httpx`
+- Convert every function to `async def`
+- Use `async with httpx.AsyncClient() as client:` pattern
+- Map: requests.get → client.get, requests.post → client.post
+- Preserve params= argument for list_products
+
+## Expected result
+import httpx
+
+BASE_URL = "https://api.example.com"
+
+async def get_product(product_id):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{BASE_URL}/products/{product_id}")
+        response.raise_for_status()
+        return response.json()
+
+async def list_products(category=None):
+    params = {"category": category} if category else {}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{BASE_URL}/products", params=params)
+        response.raise_for_status()
+        return response.json()
+
+async def create_product(data):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(f"{BASE_URL}/products", json=data)
+        response.raise_for_status()
+        return response.json()
+
+## Codebase conventions
+- Python 3.9+
+- No type hints in original — do not add them
+- Keep function signatures the same except `async def`
+
+## E2E test recipe
+cd /tmp/test-final/.hermes/worktrees/unit-03
+python3 -m pytest --tb=short -q 2>&1 | tail -10
+
+Note: tests mock requests.get — after your migration they will need to mock httpx. But that is handled by unit-04 worker. Your job: just migrate the source file. Tests may fail in your worktree — that is expected and OK for this unit.
+
+## Instructions
+Safety rules:
+- NEVER delete source files. If migration fails, revert: git checkout -- <file>
+- Install httpx if missing: pip3 install httpx
+
+Steps:
+1. cd /tmp/test-final/.hermes/worktrees/unit-03
+2. Install httpx: pip3 install httpx --quiet
+3. Edit src/api/products.py with the new async content
+4. git add -A && git commit -m "batch: migrate src/api/products.py to httpx async"
+5. git push origin HEAD:batch/unit-03-products
+6. gh pr create --title "Batch: migrate src/api/products.py to httpx async" --body "Migrated get_product, list_products, create_product from requests sync to httpx async."
+7. End your response with exactly one line: PR: <url>
+   If no PR was created: PR: none - <reason>
