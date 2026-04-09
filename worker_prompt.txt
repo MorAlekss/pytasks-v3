@@ -1,0 +1,81 @@
+You are a batch migration worker. Your task is strictly scoped.
+You have NO access to the coordinator's context - everything you need is below.
+
+## Overall goal
+Migrate all HTTP calls from requests library to httpx async across the codebase.
+
+## Your specific task
+Migrate source files from sync `requests` to async `httpx`. All 3 files:
+
+### Files to modify
+1. /tmp/test-final/.hermes/worktrees/unit-01/src/utils/http.py
+2. /tmp/test-final/.hermes/worktrees/unit-01/src/api/users.py
+3. /tmp/test-final/.hermes/worktrees/unit-01/src/api/products.py
+
+## What to change
+
+### src/utils/http.py
+FROM:
+```python
+import requests
+
+def get_json(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
+
+def post_json(url, data):
+    response = requests.post(url, json=data)
+    response.raise_for_status()
+    return response.json()
+```
+
+TO:
+```python
+import httpx
+
+async def get_json(url):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.json()
+
+async def post_json(url, data):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=data)
+        response.raise_for_status()
+        return response.json()
+```
+
+### src/api/users.py
+FROM: `import requests` + sync `requests.get/post/put/delete`
+TO: `import httpx` + async functions using `async with httpx.AsyncClient() as client:`
+
+Same pattern for all 4 functions (get_user, create_user, update_user, delete_user).
+
+### src/api/products.py
+FROM: `import requests` + sync `requests.get/post`
+TO: `import httpx` + async functions using `async with httpx.AsyncClient() as client:`
+
+Same pattern for all 3 functions (get_product, list_products, create_product).
+
+## Codebase conventions
+- Python 3.9
+- No __init__.py files
+- Functions use raise_for_status() for error handling
+- BASE_URL is defined per module as a string constant
+
+## E2E test recipe
+cd /tmp/test-final/.hermes/worktrees/unit-01 && python3 -m pytest --tb=short -q
+
+## Instructions
+Safety rules - follow these before anything else:
+- NEVER delete source files. If migration fails, revert: git checkout -- <file>
+- Run baseline tests BEFORE any changes: cd /tmp/test-final/.hermes/worktrees/unit-01 && python3 -m pytest --tb=short -q - note which tests pass
+
+After implementing the change:
+1. Run tests: cd /tmp/test-final/.hermes/worktrees/unit-01 && python3 -m pytest --tb=short -q. If tests fail, fix them.
+2. Commit and push: cd /tmp/test-final/.hermes/worktrees/unit-01 && git add -A && git commit -m "batch: migrate source files from requests to httpx async" && git push origin HEAD:batch/requests-to-httpx-sources-20260408
+3. Create PR: cd /tmp/test-final/.hermes/worktrees/unit-01 && gh pr create --title "Batch: Migrate source files from requests to httpx async" --body "Migrated src/utils/http.py, src/api/users.py, src/api/products.py from sync requests to async httpx. All functions now use `async with httpx.AsyncClient()`."
+4. Report - end your response with exactly one line: PR: <url>
+   If no PR was created, end with: PR: none - <reason>
