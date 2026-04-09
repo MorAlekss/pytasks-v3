@@ -1,26 +1,46 @@
 import sys
 sys.path.insert(0, '.')
-from unittest.mock import patch, MagicMock
+import asyncio
+from unittest.mock import patch, MagicMock, AsyncMock
+
 
 def test_get_user():
-    with patch('src.api.users.requests.get') as mock_get:
+    async def run_test():
         mock_response = MagicMock()
         mock_response.json.return_value = {"id": 1, "name": "Alice"}
         mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-        from src.api.users import get_user
-        result = get_user(1)
-        assert result["id"] == 1
+
+        mock_client = AsyncMock()
+        mock_client.get.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_client.__aexit__.return_value = None
+
+        with patch('src.api.users.httpx.AsyncClient', return_value=mock_client):
+            from src.api.users import get_user
+            result = await get_user(1)
+            assert result["id"] == 1
+
+    asyncio.run(run_test())
+
 
 def test_get_product():
-    with patch('src.api.products.requests.get') as mock_get:
+    async def run_test():
         mock_response = MagicMock()
         mock_response.json.return_value = {"id": 1, "name": "Widget"}
         mock_response.raise_for_status.return_value = None
-        mock_get.return_value = mock_response
-        from src.api.products import get_product
-        result = get_product(1)
-        assert result["name"] == "Widget"
+
+        mock_client = AsyncMock()
+        mock_client.get.return_value = mock_response
+        mock_client.__aenter__.return_value = mock_client
+        mock_client.__aexit__.return_value = None
+
+        with patch('src.api.products.httpx.AsyncClient', return_value=mock_client):
+            from src.api.products import get_product
+            result = await get_product(1)
+            assert result["name"] == "Widget"
+
+    asyncio.run(run_test())
+
 
 test_get_user()
 test_get_product()
