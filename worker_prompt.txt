@@ -1,0 +1,74 @@
+You are a batch migration worker. Your task is strictly scoped.
+You have NO access to the coordinator's context — everything you need is below.
+
+## Overall goal
+Migrate all HTTP calls from the requests library to httpx async across the codebase.
+
+## Your specific task
+Unit 1: Migrate src/utils/http.py from requests (sync) to httpx (async).
+
+## Your worktree
+/tmp/test-final/.hermes/worktrees/unit-01
+cd into it before doing anything. All file editing must be done here.
+
+## Files to modify
+src/utils/http.py
+
+## Current content of the file
+import requests
+
+def get_json(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
+
+def post_json(url, data):
+    response = requests.post(url, json=data)
+    response.raise_for_status()
+    return response.json()
+
+## What to change
+- Replace `import requests` with `import httpx`
+- Convert every function to `async def`
+- Replace `requests.get(...)` with `await httpx.AsyncClient().get(...)` — prefer using `async with httpx.AsyncClient() as client:` pattern
+- Replace `requests.post(...)` similarly
+
+## Expected result
+import httpx
+
+async def get_json(url):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.json()
+
+async def post_json(url, data):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=data)
+        response.raise_for_status()
+        return response.json()
+
+## Codebase conventions
+- Python 3.9+
+- No type hints in original — do not add them unless already present
+- Keep function signatures the same except `async def`
+
+## E2E test recipe
+cd /tmp/test-final/.hermes/worktrees/unit-01
+python3 -m pytest --tb=short -q 2>&1 | tail -10
+
+## Instructions
+Safety rules:
+- NEVER delete source files. If migration fails, revert: git checkout -- <file>
+- Install httpx if missing: pip3 install httpx
+
+Steps:
+1. cd /tmp/test-final/.hermes/worktrees/unit-01
+2. Install httpx: pip3 install httpx --quiet
+3. Edit src/utils/http.py with the new async content
+4. Run tests: python3 -m pytest --tb=short -q
+5. git add -A && git commit -m "batch: migrate src/utils/http.py to httpx async"
+6. git push origin HEAD:batch/unit-01-http
+7. gh pr create --title "Batch: migrate src/utils/http.py to httpx async" --body "Migrated get_json and post_json from requests sync to httpx async."
+8. End your response with exactly one line: PR: <url>
+   If no PR was created: PR: none - <reason>
